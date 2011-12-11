@@ -364,7 +364,7 @@ team() ->
     get_app_key(team, "Team <info@team.com>").
     
 org_name() ->
-    get_app_key(team, "Organization").
+    get_app_key(org_name, "Organization").
     
 copyright() ->
     get_app_key(copyright, "YYYY Organization").
@@ -372,6 +372,8 @@ copyright() ->
 callback_mod() ->
     get_app_key(callback_mod, gettext_server).
 
+package_version() ->
+    get_app_key(package_version, "PACKAGE VERSION").
 
 
 mk_polish_style_header(LC) ->
@@ -383,24 +385,30 @@ mk_polish_style_header(LC) ->
       fixed_revision_date(),
       fixed_last_translator(),
       team(),
-      charset()
+      charset(),
+      package_version()
      ).
 
 mk_polish_style_header(Header, CopyRight, CreateDate, RevDate, 
-                       LastTranslator, Team, Charset) ->
-    "# "++Header++"\n"
+                       LastTranslator, Team, Charset, PackageVersion) ->
+    Output = "# "++Header++"\n"
         "# Copyright (C) "++CopyRight++"\n"
         "#\n"
         "msgid \"\"\n"
         "msgstr \"\"\n"
-        "\"Project-Id-Version: PACKAGE VERSION\\n\"\n"
+        "\"Project-Id-Version: "++PackageVersion++"\\n\"\n"
         "\"POT-Creation-Date: "++CreateDate++"\\n\"\n"
         "\"PO-Revision-Date: "++RevDate++"\\n\"\n"
-        "\"Last-Translator: "++LastTranslator++">\\n\"\n"
-        "\"Language-Team: "++Team++"\\n\"\n"
         "\"MIME-Version: 1.0\\n\"\n"
         "\"Content-Type: text/plain; charset="++Charset++"\\n\"\n"
-        "\"Content-Transfer-Encoding: 8bit\\n\"\n".
+        "\"Content-Transfer-Encoding: 8bit\\n\"\n",
+    Optional = [{"Last-Translator", LastTranslator},
+                {"Language-Team", Team}],
+    Output ++ lists:flatten([case V of
+                                 exclude -> [];
+                                 _       -> "\""++K++": " ++V++"\\n\"\n"
+                             end
+                             || {K, V} <- Optional]).
 
 get_language_name(undefined) -> "";
 get_language_name(LC)        -> gettext_iso639:lc2lang(LC).
