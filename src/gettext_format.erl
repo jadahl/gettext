@@ -108,11 +108,10 @@ stxt3([], _, _) ->
 %% get the substitute value
 get_arg(Key, Args) ->
     {value, {_, Val}} = lists:keysearch(Key, 1, Args),
-    case is_list(Val) of
-	true ->
-	    Val;
-	false ->
-	    io_lib:format("~p", [Val])
+    if
+        is_list(Val)   -> Val;
+        is_binary(Val) -> [Val]; % Let callee decide what to do with binaries
+        true           -> io_lib:format("~p", [Val])
     end.
 
 
